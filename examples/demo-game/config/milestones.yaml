@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../../../schema/milestones.json
+# Ordered. Each `when` is a JSONata condition; `at` (optional) yields the exact time.
+- key: finished_tutorial
+  when: progress.quests.completed.q_intro
+  at: progress.quests.completed.q_intro.at
+- key: left_first_area
+  when: progress.quests.completed.q_first_area
+  at: progress.quests.completed.q_first_area.at
+- key: joined_guild
+  when: progress.quests.completed.q_join_guild
+  at: progress.quests.completed.q_join_guild.at
+- key: beat_first_boss
+  when: progress.quests.completed.q_first_boss
+  at: progress.quests.completed.q_first_boss.at
+- key: reached_endgame
+  when: progress.quests.completed.q_endgame
+  at: progress.quests.completed.q_endgame.at

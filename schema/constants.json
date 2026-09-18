@@ -1,0 +1,11 @@
+{
+  "$id": "https://github.com/knightav/rbx-pulse/schema/constants.json",
+  "title": "rbx-pulse constants.yaml",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "propertyNames": {
+    "type": "string",
+    "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+  },
+  "additionalProperties": {}
+}

@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../../../schema/flags.json
+# Unordered. No `at` means timing comes from snapshot intervals.
+- key: reached_level_10
+  when: $floor($sqrt(stats.xp / 100)) + 1 >= 10
+- key: unlocked_caves
+  when: $has(progress.areas, "caves")
+- key: full_inventory
+  when: $count($objects(inventory.slots)) = inventory.slotCount
+- key: collector_25
+  when: $size(collection) >= 25
+# From the mounted purchase store. `at` gives exact precision from the first sync.
+- key: first_purchase
+  when: $count(purchases) > 0
+  at: $min(purchases.at)
+- key: paid_robux
+  when: $sum(purchases.robuxSpent) > 0
+  at: $min(purchases[robuxSpent > 0].at)

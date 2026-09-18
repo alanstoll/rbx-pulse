@@ -1,0 +1,120 @@
+# yaml-language-server: $schema=../../../schema/facts.json
+# Facts are JSONata expressions evaluated against the unwrapped player record.
+# `$meta` holds wrapper metadata (e.g. DocumentService lockTimestamp).
+# YAML note: quote any expression containing `: ` or `#`, or use a `>-` block.
+
+# --- timestamps
+- key: created_at
+  semantics: timestamp
+  unit: seconds
+  expr: profile.createdAt
+- key: last_seen_at
+  semantics: timestamp
+  unit: seconds
+  expr: profile.lastSeenAt
+
+# --- counters (monotonic)
+- key: playtime_seconds
+  semantics: counter
+  expr: profile.playtimeSeconds
+- key: xp
+  semantics: counter
+  expr: stats.xp
+- key: enemies_defeated
+  semantics: counter
+  expr: stats.enemiesDefeated
+- key: distance
+  semantics: counter
+  expr: stats.distance
+- key: items_found
+  semantics: counter
+  description: Distinct collection entries. $size tolerates [] for an empty map.
+  expr: $size(collection)
+- key: quests_completed
+  semantics: counter
+  expr: $size(progress.quests.completed)
+
+# --- gauges (can go up or down)
+- key: coins
+  semantics: gauge
+  expr: stats.coins
+- key: gems
+  semantics: gauge
+  expr: stats.gems
+- key: inventory_used
+  semantics: gauge
+  description: Slots holding an object; false placeholders are skipped.
+  expr: $count($objects(inventory.slots))
+
+# --- derived scalars
+- key: level
+  semantics: gauge
+  description: Level is not stored; derived from xp with the game's formula ($xpPerLevel from constants.yaml).
+  expr: $floor($sqrt(stats.xp / $xpPerLevel)) + 1
+
+# --- booleans
+- key: tutorial_done
+  semantics: boolean
+  expr: flags.tutorialDone
+- key: premium
+  semantics: boolean
+  expr: flags.premium
+
+# --- labels
+- key: music_setting
+  semantics: label
+  expr: 'settings.music ? "on" : "off"'
+
+# --- keyed facts: one row per key, stored in `dim`
+- key: area_unlocked
+  shape: keyed
+  semantics: boolean
+  description: Which areas each player has unlocked.
+  expr: '$entries(progress.areas).{ "dim": key, "value": value }'
+- key: quest_completed_at
+  shape: keyed
+  semantics: timestamp
+  unit: seconds
+  expr: '$entries(progress.quests.completed).{ "dim": key, "value": value.at }'
+- key: item_first_found_at
+  shape: keyed
+  semantics: timestamp
+  unit: seconds
+  expr: '$entries(collection).{ "dim": key, "value": value.firstAt }'
+
+# --- events: harvested from the rolling activity log
+- key: activity
+  shape: events
+  unit: seconds
+  expr: 'recentEvents.{ "type": t, "data": $string(d), "ts": ts }'
+
+# --- supplemental store: `purchases` is mounted from the sparse Purchases datastore (game.yaml).
+# Most players have no purchase record, so the path is simply absent for them: $count gives 0,
+# $sum gives no value (hence $default), comparisons are false.
+- key: purchase_count
+  semantics: counter
+  expr: $count(purchases)
+- key: robux_spent
+  semantics: counter
+  expr: $default($sum(purchases.robuxSpent), 0)
+- key: first_purchase_at
+  semantics: timestamp
+  unit: seconds
+  expr: $min(purchases.at)
+- key: last_purchase_at
+  semantics: timestamp
+  unit: seconds
+  expr: $max(purchases.at)
+- key: purchase_record_updated_at
+  description: Last write to the purchase record itself, from Open Cloud metadata via $stores.
+  semantics: timestamp
+  unit: seconds
+  expr: $stores.purchases.entry.revisionCreateTime
+- key: purchases_by_product
+  shape: keyed
+  semantics: counter
+  expr: 'purchases{productKey: $count($)}'
+- key: purchase_events
+  shape: events
+  unit: seconds
+  expr: 'purchases.{ "type": "purchase", "data": productKey, "ts": at, "attrs": { "currency": currency, "robux": robuxSpent } }'

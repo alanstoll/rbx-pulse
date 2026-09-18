@@ -1,0 +1,23 @@
+# Private game configuration. Never commit your real schema.
+/config/
+
+# Generated demo data
+/examples/demo-game/data/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Build and deps
+node_modules/
+dist/
+coverage/
+
+# Local docker volumes
+/.docker-data/
+
+# Editor
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,329 @@
+{
+  "uid": "pulse-progression",
+  "title": "Pulse / Progression",
+  "tags": [
+    "pulse"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "",
+  "time": {
+    "from": "now-90d",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "ds",
+        "label": "Database",
+        "type": "datasource",
+        "query": "grafana-postgresql-datasource",
+        "current": {
+          "selected": false,
+          "text": "pulse",
+          "value": "pulse-postgres"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "options": [],
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "description": "pulse = your game (DATABASE_URL); pulse-demo = the turn-key demo"
+      },
+      {
+        "name": "counter",
+        "label": "Counter fact",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${ds}"
+        },
+        "query": "SELECT DISTINCT key FROM stat_delta WHERE dim = '' ORDER BY 1",
+        "definition": "SELECT DISTINCT key FROM stat_delta WHERE dim = '' ORDER BY 1",
+        "refresh": 1,
+        "includeAll": false,
+        "multi": false
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "barchart",
+      "title": "Milestone funnel: players reached (config order)",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "always"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT key, count(*) AS players FROM milestone_event WHERE kind = 'milestone' GROUP BY key, ordinal ORDER BY ordinal"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "barchart",
+      "title": "Milestone funnel: share of players (%)",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "always"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT m.key, round(100.0 * count(*) / NULLIF((SELECT count(*) FROM profile_version WHERE valid_to IS NULL), 0), 1) AS pct FROM milestone_event m WHERE m.kind = 'milestone' GROUP BY m.key, m.ordinal ORDER BY m.ordinal"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "barchart",
+      "title": "Median days from first save to milestone",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "always"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "d",
+          "decimals": 1
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT m.key, percentile_cont(0.5) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (m.reached_hi - p.entry_created_at)) / 86400.0) AS median_days FROM milestone_event m JOIN player p ON p.user_id = m.user_id WHERE m.kind = 'milestone' AND p.entry_created_at IS NOT NULL GROUP BY m.key, m.ordinal ORDER BY m.ordinal"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "barchart",
+      "title": "Flags: share of players (%)",
+      "gridPos": {
+        "x": 12,
+        "y": 9,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "always"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT m.key, round(100.0 * count(*) / NULLIF((SELECT count(*) FROM profile_version WHERE valid_to IS NULL), 0), 1) AS pct FROM milestone_event m WHERE m.kind = 'flag' GROUP BY m.key ORDER BY pct DESC"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Milestones reached per week",
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('week', reached_hi) AS time, key AS metric, count(*) AS value FROM milestone_event WHERE kind = 'milestone' AND $__timeFilter(reached_hi) GROUP BY 1, 2 ORDER BY 1"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "piechart",
+      "title": "Timing precision of recorded events",
+      "gridPos": {
+        "x": 12,
+        "y": 18,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT precision, count(*) AS events FROM milestone_event GROUP BY precision"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "$counter: total gained per day across players",
+      "gridPos": {
+        "x": 0,
+        "y": 27,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('day', to_at) AS time, sum(delta) AS \"$counter\" FROM stat_delta WHERE key = '$counter' AND dim = '' AND NOT reset AND $__timeFilter(to_at) GROUP BY 1 ORDER BY 1"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "histogram",
+      "title": "$counter: per-day rate across players (latest delta each)",
+      "gridPos": {
+        "x": 12,
+        "y": 27,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "options": {
+        "bucketCount": 30
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT DISTINCT ON (user_id) per_day AS \"$counter per day\" FROM stat_delta WHERE key = '$counter' AND dim = '' AND NOT reset ORDER BY user_id, to_at DESC"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "Biggest movers in the last 14 days ($counter)",
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT user_id, from_at, to_at, from_value, to_value, delta, round(per_day::numeric, 2) AS per_day FROM stat_delta WHERE key = '$counter' AND dim = '' AND to_at > now() - interval '14 days' ORDER BY delta DESC LIMIT 50"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "table",
+      "title": "Counter resets detected",
+      "gridPos": {
+        "x": 12,
+        "y": 36,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT user_id, key, dim, from_at, to_at, from_value, to_value FROM stat_delta WHERE reset ORDER BY to_at DESC LIMIT 100"
+        }
+      ]
+    }
+  ]
+}

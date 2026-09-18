@@ -1,0 +1,38 @@
+{
+  "name": "rbx-pulse",
+  "version": "0.1.0",
+  "description": "Config-driven analytics for Roblox DataStore records: milestones, stats over time, and cohorts, pulled read-only via Open Cloud into a local Postgres + Grafana stack.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "pulse": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pulse": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:db": "vitest run test/sync-db.test.ts test/profile-db.test.ts",
+    "lint": "eslint src test"
+  },
+  "dependencies": {
+    "commander": "^15.0.0",
+    "dotenv": "^17.4.2",
+    "jsonata": "^2.2.2",
+    "pg": "^8.23.0",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "@types/pg": "^8.23.1",
+    "eslint": "^10.10.0",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.1"
+  }
+}

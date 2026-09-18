@@ -1,0 +1,29 @@
+[
+  {
+    "at": 1781285371,
+    "currency": "coins",
+    "placeId": 424242,
+    "productId": 9004,
+    "productKey": "starter_bundle",
+    "purchaseId": "3f9c1a7e2b4d",
+    "robuxSpent": 0
+  },
+  {
+    "at": 1783877371,
+    "currency": "coins",
+    "placeId": 424242,
+    "productId": 9002,
+    "productKey": "coins_large",
+    "purchaseId": "a81e55c0d2f7",
+    "robuxSpent": 199
+  },
+  {
+    "at": 1786730147,
+    "currency": "gems",
+    "placeId": 424242,
+    "productId": 9003,
+    "productKey": "gems_pack",
+    "purchaseId": "0c4b9e7d6a13",
+    "robuxSpent": 99
+  }
+]

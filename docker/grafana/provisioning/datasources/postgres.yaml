@@ -1,0 +1,36 @@
+apiVersion: 1
+
+# Two tenants on the same Postgres: your real game and the turn-key demo. Every dashboard
+# has a "Database" dropdown that switches between them.
+datasources:
+  - name: pulse
+    uid: pulse-postgres
+    type: grafana-postgresql-datasource
+    access: proxy
+    url: postgres:5432
+    user: pulse
+    isDefault: true
+    editable: false
+    jsonData:
+      database: pulse
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    secureJsonData:
+      password: pulse
+
+  - name: pulse-demo
+    uid: pulse-demo
+    type: grafana-postgresql-datasource
+    access: proxy
+    url: postgres:5432
+    user: pulse
+    isDefault: false
+    editable: false
+    jsonData:
+      database: pulse_demo
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    secureJsonData:
+      password: pulse

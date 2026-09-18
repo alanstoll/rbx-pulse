@@ -1,0 +1,346 @@
+{
+  "data": {
+    "profile": {
+      "createdAt": 1785052124,
+      "lastSeenAt": 1789523728,
+      "playtimeSeconds": 33665
+    },
+    "stats": {
+      "coins": 2641,
+      "gems": 2,
+      "xp": 23660,
+      "enemiesDefeated": 550,
+      "distance": 33163
+    },
+    "progress": {
+      "areas": {
+        "meadow": true,
+        "forest": true,
+        "caves": true,
+        "summit": true,
+        "abyss": true
+      },
+      "quests": {
+        "completed": {
+          "q_intro": {
+            "at": 1785052286,
+            "count": 1
+          },
+          "q_first_area": {
+            "at": 1786147248,
+            "count": 1
+          },
+          "q_join_guild": {
+            "at": 1786336427,
+            "count": 1
+          },
+          "q_first_boss": {
+            "at": 1786905337,
+            "count": 1
+          },
+          "q_endgame": {
+            "at": 1787099862,
+            "count": 1
+          }
+        },
+        "active": []
+      }
+    },
+    "flags": {
+      "tutorialDone": true,
+      "joinedGuild": true,
+      "premium": false
+    },
+    "collection": {
+      "item_019": {
+        "found": true,
+        "firstAt": 1785052329,
+        "count": 3
+      },
+      "item_036": {
+        "found": true,
+        "firstAt": 1785052738,
+        "count": 3
+      },
+      "item_018": {
+        "found": true,
+        "firstAt": 1785064695,
+        "count": 4
+      },
+      "item_003": {
+        "found": true,
+        "firstAt": 1785065120,
+        "count": 5
+      },
+      "item_028": {
+        "found": true,
+        "firstAt": 1785386561,
+        "count": 5
+      },
+      "item_038": {
+        "found": true,
+        "firstAt": 1785384820,
+        "count": 4
+      },
+      "item_005": {
+        "found": true,
+        "firstAt": 1785384613,
+        "count": 2
+      },
+      "item_015": {
+        "found": true,
+        "firstAt": 1785385953,
+        "count": 1
+      },
+      "item_025": {
+        "found": true,
+        "firstAt": 1785387155,
+        "count": 2
+      },
+      "item_004": {
+        "found": true,
+        "firstAt": 1785386637,
+        "count": 1
+      },
+      "item_012": {
+        "found": true,
+        "firstAt": 1785575842,
+        "count": 3
+      },
+      "item_034": {
+        "found": true,
+        "firstAt": 1785576341,
+        "count": 2
+      },
+      "item_040": {
+        "found": true,
+        "firstAt": 1785576738,
+        "count": 2
+      },
+      "item_014": {
+        "found": true,
+        "firstAt": 1785883931,
+        "count": 10
+      },
+      "item_026": {
+        "found": true,
+        "firstAt": 1785885562,
+        "count": 5
+      },
+      "item_016": {
+        "found": true,
+        "firstAt": 1785883750,
+        "count": 2
+      },
+      "item_035": {
+        "found": true,
+        "firstAt": 1785884321,
+        "count": 4
+      },
+      "item_001": {
+        "found": true,
+        "firstAt": 1785885204,
+        "count": 2
+      },
+      "item_009": {
+        "found": true,
+        "firstAt": 1786148487,
+        "count": 1
+      },
+      "item_023": {
+        "found": true,
+        "firstAt": 1786148478,
+        "count": 2
+      },
+      "item_007": {
+        "found": true,
+        "firstAt": 1786147033,
+        "count": 4
+      },
+      "item_024": {
+        "found": true,
+        "firstAt": 1786336530,
+        "count": 2
+      },
+      "item_013": {
+        "found": true,
+        "firstAt": 1786337204,
+        "count": 1
+      },
+      "item_020": {
+        "found": true,
+        "firstAt": 1786473719,
+        "count": 3
+      },
+      "item_029": {
+        "found": true,
+        "firstAt": 1786474078,
+        "count": 1
+      },
+      "item_006": {
+        "found": true,
+        "firstAt": 1786542521,
+        "count": 3
+      },
+      "item_033": {
+        "found": true,
+        "firstAt": 1786541330,
+        "count": 3
+      },
+      "item_030": {
+        "found": true,
+        "firstAt": 1786540881,
+        "count": 1
+      },
+      "item_021": {
+        "found": true,
+        "firstAt": 1786542689,
+        "count": 1
+      },
+      "item_031": {
+        "found": true,
+        "firstAt": 1786543603,
+        "count": 4
+      },
+      "item_039": {
+        "found": true,
+        "firstAt": 1786907714,
+        "count": 3
+      },
+      "item_027": {
+        "found": true,
+        "firstAt": 1787099602,
+        "count": 2
+      },
+      "item_011": {
+        "found": true,
+        "firstAt": 1787099628,
+        "count": 2
+      },
+      "item_032": {
+        "found": true,
+        "firstAt": 1787319771,
+        "count": 2
+      },
+      "item_022": {
+        "found": true,
+        "firstAt": 1787819129,
+        "count": 2
+      },
+      "item_002": {
+        "found": true,
+        "firstAt": 1789104183,
+        "count": 2
+      },
+      "item_037": {
+        "found": true,
+        "firstAt": 1789521553,
+        "count": 1
+      },
+      "item_010": {
+        "found": true,
+        "firstAt": 1789523704,
+        "count": 1
+      }
+    },
+    "inventory": {
+      "slotCount": 8,
+      "slots": [
+        {
+          "itemId": "item_033",
+          "qty": 1
+        },
+        {
+          "itemId": "item_020",
+          "qty": 5
+        },
+        {
+          "itemId": "item_021",
+          "qty": 5
+        },
+        {
+          "itemId": "item_019",
+          "qty": 5
+        },
+        {
+          "itemId": "item_024",
+          "qty": 1
+        },
+        {
+          "itemId": "item_040",
+          "qty": 3
+        },
+        {
+          "itemId": "item_008",
+          "qty": 4
+        },
+        {
+          "itemId": "item_039",
+          "qty": 1
+        }
+      ]
+    },
+    "recentEvents": [
+      {
+        "t": "find",
+        "d": "item_011",
+        "ts": 1787099628
+      },
+      {
+        "t": "quest",
+        "d": "q_endgame",
+        "ts": 1787099862
+      },
+      {
+        "t": "find",
+        "d": "item_032",
+        "ts": 1787319771
+      },
+      {
+        "t": "find",
+        "d": "item_022",
+        "ts": 1787819129
+      },
+      {
+        "t": "lvl",
+        "d": 14,
+        "ts": 1788228934
+      },
+      {
+        "t": "lvl",
+        "d": 15,
+        "ts": 1788611386
+      },
+      {
+        "t": "find",
+        "d": "item_002",
+        "ts": 1789104183
+      },
+      {
+        "t": "lvl",
+        "d": 16,
+        "ts": 1789408336
+      },
+      {
+        "t": "find",
+        "d": "item_037",
+        "ts": 1789521553
+      },
+      {
+        "t": "find",
+        "d": "item_010",
+        "ts": 1789523704
+      }
+    ],
+    "settings": {
+      "music": true,
+      "muted": []
+    }
+  },
+  "dataSchemaVersion": 0,
+  "documentServiceSchemaVersion": 0,
+  "isLocked": false,
+  "lastCompatibleVersion": 0,
+  "lockTimestamp": 1789523728,
+  "sessionLockId": "demo-1789523728"
+}

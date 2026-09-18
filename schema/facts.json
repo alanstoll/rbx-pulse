@@ -1,0 +1,52 @@
+{
+  "$id": "https://github.com/knightav/rbx-pulse/schema/facts.json",
+  "title": "rbx-pulse facts.yaml",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "key": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,62}$"
+      },
+      "description": {
+        "type": "string"
+      },
+      "expr": {
+        "type": "string",
+        "minLength": 1
+      },
+      "shape": {
+        "default": "scalar",
+        "type": "string",
+        "enum": [
+          "scalar",
+          "keyed",
+          "events"
+        ]
+      },
+      "semantics": {
+        "type": "string",
+        "enum": [
+          "counter",
+          "gauge",
+          "boolean",
+          "timestamp",
+          "label"
+        ]
+      },
+      "unit": {
+        "type": "string",
+        "enum": [
+          "seconds",
+          "millis"
+        ]
+      }
+    },
+    "required": [
+      "key",
+      "expr"
+    ]
+  }
+}

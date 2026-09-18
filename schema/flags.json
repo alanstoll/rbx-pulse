@@ -1,0 +1,38 @@
+{
+  "$id": "https://github.com/knightav/rbx-pulse/schema/flags.json",
+  "title": "rbx-pulse flags.yaml",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "key": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,62}$"
+      },
+      "description": {
+        "type": "string"
+      },
+      "when": {
+        "type": "string",
+        "minLength": 1
+      },
+      "at": {
+        "type": "string",
+        "minLength": 1
+      },
+      "unit": {
+        "default": "seconds",
+        "type": "string",
+        "enum": [
+          "seconds",
+          "millis"
+        ]
+      }
+    },
+    "required": [
+      "key",
+      "when"
+    ]
+  }
+}

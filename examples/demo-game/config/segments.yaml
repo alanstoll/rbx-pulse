@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=../../../schema/segments.json
+# Segments yield either a boolean (membership) or a label (category).
+- key: join_week
+  description: ISO week the player first saved. A static cohort.
+  label: $fromMillis(profile.createdAt * 1000, "[Y0001]-W[W01]")
+- key: is_premium
+  description: Segment keys share the wide view's columns with facts, so this cannot also be called `premium`.
+  boolean: flags.premium
+- key: playtime_band
+  description: A dynamic cohort; membership changes as players play.
+  label: >-
+    profile.playtimeSeconds < 3600 ? "under_1h"
+      : profile.playtimeSeconds < 36000 ? "1h_to_10h"
+      : "over_10h"
+- key: level_band
+  label: >-
+    ($l := $floor($sqrt(stats.xp / 100)) + 1;
+     $l < 5 ? "1-4" : $l < 10 ? "5-9" : $l < 20 ? "10-19" : "20+")
+- key: purchaser
+  description: Has any purchase record (a supplemental datastore mounted at `purchases`).
+  boolean: $count(purchases) > 0

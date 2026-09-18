@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=../../../schema/game.json
+# Demo game: points at the mock Open Cloud server (`pulse demo serve`).
+universeId: 1
+apiKeyEnv: DEMO_API_KEY
+baseUrl: http://localhost:4010
+
+datastores:
+  # The first datastore is the primary: its unwrapped data is the root document.
+  - name: PlayerData
+    scope: global
+    keyTemplate: "Player_{userId}"
+    envelope: documentservice
+
+  # A supplemental store held by ~5% of players: their purchase history as a flat array.
+  # `mount` makes it appear as `purchases` in the root document, exactly as if the game
+  # had kept the array inside the player record. Absent for everyone else.
+  - name: Purchases
+    scope: global
+    keyTemplate: "{userId}"
+    envelope: raw
+    mount: purchases
+    sync:
+      discovery: list       # sparse: listing its own keys is far cheaper than probing every active player
+      backfill: false       # every row is timestamped already; revision history adds nothing
+
+sync:
+  budgetFraction: 0.5
+  maxRequestsPerMinute: 200
+  concurrency: 4

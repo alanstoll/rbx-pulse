@@ -1,0 +1,264 @@
+{
+  "uid": "pulse-cohorts",
+  "title": "Pulse / Cohorts",
+  "tags": [
+    "pulse"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "",
+  "time": {
+    "from": "now-90d",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "ds",
+        "label": "Database",
+        "type": "datasource",
+        "query": "grafana-postgresql-datasource",
+        "current": {
+          "selected": false,
+          "text": "pulse",
+          "value": "pulse-postgres"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "options": [],
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "description": "pulse = your game (DATABASE_URL); pulse-demo = the turn-key demo"
+      },
+      {
+        "name": "segment",
+        "label": "Segment (label)",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${ds}"
+        },
+        "query": "SELECT DISTINCT key FROM segment_membership WHERE label IS NOT NULL ORDER BY 1",
+        "definition": "SELECT DISTINCT key FROM segment_membership WHERE label IS NOT NULL ORDER BY 1",
+        "refresh": 1,
+        "includeAll": false,
+        "multi": false
+      },
+      {
+        "name": "cohort",
+        "label": "Cohort",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${ds}"
+        },
+        "query": "SELECT DISTINCT label FROM v_segment_current WHERE key = '$segment' ORDER BY 1",
+        "definition": "SELECT DISTINCT label FROM v_segment_current WHERE key = '$segment' ORDER BY 1",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*"
+      },
+      {
+        "name": "stat",
+        "label": "Numeric fact",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "${ds}"
+        },
+        "query": "SELECT DISTINCT key FROM fact WHERE kind IN ('counter','gauge') AND dim = '' ORDER BY 1",
+        "definition": "SELECT DISTINCT key FROM fact WHERE kind IN ('counter','gauge') AND dim = '' ORDER BY 1",
+        "refresh": 1,
+        "includeAll": false,
+        "multi": false
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "barchart",
+      "title": "Cohort sizes ($segment, current)",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "always"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT label, count(*) AS players FROM v_segment_current WHERE key = '$segment' AND label ~ '^(${cohort:regex})$' GROUP BY label ORDER BY label"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "barchart",
+      "title": "$stat by cohort: mean and median (current)",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "always"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT s.label, round(avg(f.num)::numeric, 1) AS mean, percentile_cont(0.5) WITHIN GROUP (ORDER BY f.num) AS median FROM v_segment_current s JOIN v_fact_current f ON f.user_id = s.user_id AND f.key = '$stat' AND f.dim = '' WHERE s.key = '$segment' AND s.label ~ '^(${cohort:regex})$' GROUP BY s.label ORDER BY s.label"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "barchart",
+      "title": "Milestone funnel by cohort: share of cohort players (%)",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "options": {
+        "orientation": "vertical",
+        "showValue": "auto",
+        "groupWidth": 0.8,
+        "xField": "milestone"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "WITH cohorts AS (SELECT user_id, label FROM v_segment_current WHERE key = '$segment' AND label ~ '^(${cohort:regex})$'), sizes AS (SELECT label, count(*) AS n FROM cohorts GROUP BY label), ms AS (SELECT DISTINCT key, ordinal FROM milestone_event WHERE kind = 'milestone') SELECT ms.key AS milestone, sz.label, round(100.0 * count(m.user_id) / sz.n, 1) AS pct FROM ms CROSS JOIN sizes sz LEFT JOIN cohorts c ON c.label = sz.label LEFT JOIN milestone_event m ON m.user_id = c.user_id AND m.key = ms.key GROUP BY ms.key, ms.ordinal, sz.label, sz.n ORDER BY ms.ordinal, sz.label"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "groupingToMatrix",
+          "options": {
+            "columnField": "label",
+            "rowField": "milestone",
+            "valueField": "pct"
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Cohort composition over time ($segment)",
+      "gridPos": {
+        "x": 0,
+        "y": 19,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "stacking": {
+              "mode": "normal"
+            },
+            "fillOpacity": 40
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT t AS time, s.label AS metric, count(s.user_id) AS value FROM generate_series(date_trunc('day', $__timeFrom()::timestamptz), $__timeTo()::timestamptz, interval '1 day') t LEFT JOIN segment_membership s ON s.key = '$segment' AND s.label ~ '^(${cohort:regex})$' AND s.valid_from <= t AND (s.valid_to IS NULL OR s.valid_to > t) GROUP BY t, s.label ORDER BY t"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Returning players per week by cohort (record changed between syncs)",
+      "gridPos": {
+        "x": 12,
+        "y": 19,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('week', o.observed_at) AS time, s.label AS metric, count(DISTINCT o.user_id) AS value FROM observation o JOIN v_segment_current s ON s.user_id = o.user_id AND s.key = '$segment' AND s.label ~ '^(${cohort:regex})$' WHERE o.changed AND o.observed_at > (SELECT min(o2.observed_at) FROM observation o2 WHERE o2.user_id = o.user_id) AND $__timeFilter(o.observed_at) GROUP BY 1, 2 ORDER BY 1"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "table",
+      "title": "Players in the selected cohorts",
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${ds}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT p.*, a.last_changed_at, a.times_changed FROM v_player_current p JOIN v_segment_current s ON s.user_id = p.user_id AND s.key = '$segment' AND s.label ~ '^(${cohort:regex})$' LEFT JOIN v_player_activity a ON a.user_id = p.user_id ORDER BY a.last_changed_at DESC NULLS LAST LIMIT 500"
+        }
+      ]
+    }
+  ]
+}

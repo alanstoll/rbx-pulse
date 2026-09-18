@@ -1,0 +1,3 @@
+# yaml-language-server: $schema=../../../schema/constants.json
+# Optional lookup values, available to every expression as $name.
+xpPerLevel: 100

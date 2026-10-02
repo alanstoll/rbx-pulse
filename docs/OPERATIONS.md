@@ -66,9 +66,11 @@ extra scope `universe.ordered-data-store.scope.entry:read`. Players who never lo
 after the index was introduced are never re-fetched, which is correct: their records
 cannot have changed.
 
-Index mode has so far been exercised against the mock server only; no universe used in
-development had such an index. Watch the first incremental run's `checked` count against
-your expectations and fall back to `--full` if it looks wrong.
+It is safe to configure the index before the game writes it. A run uses the index only
+when the index's oldest entry is older than the cutoff (previous run minus the margin).
+Until then, including while the index is empty, it lists every key. Once the game code
+ships, the next full run becomes the baseline. When you publish, restart or migrate
+servers: old servers keep running old code and never write the index.
 
 Game side, the write is one line per login, for example
 `OrderedDataStore:SetAsync(tostring(userId), os.time())`, budgeted like any other

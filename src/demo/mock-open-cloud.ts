@@ -165,7 +165,8 @@ export class MockOpenCloud {
       const [, universeId, dsName, scope] = om;
       if (universeId !== this.opts.universeId) return this.json(res, 403, { code: 'PERMISSION_DENIED', message: 'wrong universe' }, rl);
       const idx = await this.index(decodeURIComponent(dsName!));
-      if (!idx) return this.json(res, 404, { code: 'NOT_FOUND', message: `ordered datastore ${dsName} not found` }, rl);
+      // Like the real API, an ordered datastore that was never written lists as empty.
+      if (!idx) return this.json(res, 200, {}, rl);
       const desc = (url.searchParams.get('orderBy') ?? '').includes('desc');
       const sorted = [...idx.entries].sort((a, b) => (desc ? b.value - a.value : a.value - b.value));
       const { items, next } = this.page(sorted, url, 100);

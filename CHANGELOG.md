@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Sync**: an incremental run falls back to a full listing when the last-login index
+  is empty, missing, or newer than the cutoff, so the index can be configured before
+  the game writes it. The mock server now lists a missing ordered datastore as empty,
+  as Open Cloud does.
+
 ## 0.1.0 (2026-09-18)
 
 First release.

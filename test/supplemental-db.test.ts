@@ -160,7 +160,8 @@ describe.skipIf(!url)('supplemental datastores (Postgres integration)', () => {
 
   it('index discovery on the supplemental store records absent, not missing, for non-buyers', async () => {
     const entries = await readDataset(dir, 'PlayerData');
-    const changed = tickDataset(entries, { fraction: 0.4, seed: 5, now: NOW + 7 * 86400 });
+    // Sessions must land after the previous run, which used the real clock.
+    const changed = tickDataset(entries, { fraction: 0.4, seed: 5, now: Math.floor(Date.now() / 1000) + 7 * 86400 });
     await writeAll(entries);
     const indexed: PulseConfig = { ...config, game: { ...config.game, datastores: config.game.datastores.map((d) => (d.name === 'Purchases' ? { ...d, sync: { ...d.sync, discovery: 'index' as const } } : d)) } };
     const before = await count(`SELECT count(*) AS n FROM observation WHERE status = 'absent'`);

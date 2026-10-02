@@ -97,6 +97,36 @@ describe.skipIf(!url)('phase 5: index sync, backfill, enrich (Postgres integrati
     expect(r4.stats.changed).toBe(0);
   });
 
+  it('falls back to a full listing while the index is missing or younger than the cutoff', async () => {
+    const withIndex = (orderedDatastore: string): PulseConfig => ({
+      ...config,
+      game: { ...config.game, sync: { ...config.game.sync, index: { ...config.game.sync.index!, orderedDatastore } } },
+    });
+    const run = async (cfg: PulseConfig) => {
+      const c = client();
+      return runSync({ config: cfg, store: new SyncStore(pool), client: c.client, limiter: c.limiter, log: { info: () => {}, warn: () => {} }, ignoreWindow: true });
+    };
+
+    // The game has not shipped the index yet.
+    const missing = await run(withIndex('NotShippedYet'));
+    expect(missing.stats.mode).toBe('full');
+    expect(missing.stats.checked).toBe(players);
+
+    // The index exists but every entry is newer than the previous run: logins between
+    // that run and the index going live would be missed.
+    const future = Math.floor(Date.now() / 1000) + 30 * 86400;
+    await writeOrderedIndex(dir, 'JustShipped', [{ key: '1', value: future }]);
+    const young = await run(withIndex('JustShipped'));
+    expect(young.stats.mode).toBe('full');
+    expect(young.stats.checked).toBe(players);
+
+    // Once the index predates the cutoff, runs are incremental.
+    await writeOrderedIndex(dir, 'JustShipped', [{ key: '1', value: 0 }]);
+    const ready = await run(withIndex('JustShipped'));
+    expect(ready.stats.mode).toBe('index');
+    expect(ready.stats.checked).toBe(0);
+  });
+
   it('backfill adds earlier snapshots from revision history and the pipeline rebuilds versions', async () => {
     const before = await count('SELECT count(*) AS n FROM snapshot');
     const withHistory = (await readDataset(dir, 'PlayerData')).filter((e) => (e.revisions?.length ?? 0) > 0).length;

@@ -76,6 +76,23 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
   const indexTemplate = index ? new KeyTemplate(index.keyTemplate) : undefined;
   stats.datastores ??= {};
 
+  // The index only vouches for logins since the game started writing it, so index mode
+  // needs its oldest entry to predate the cutoff. Open Cloud answers an empty 200 for an
+  // ordered datastore that does not exist, so "not shipped yet" reads as no oldest entry.
+  // The oldest value drifts later as early players return; that errs toward full listings.
+  let indexStart: Promise<number | undefined> | undefined;
+  const oldestIndexMs = async (): Promise<number | undefined> => {
+    try {
+      const page = await client.listOrderedEntries(index!.orderedDatastore, index!.scope, undefined, false, 1);
+      const v = page.entries[0]?.value;
+      if (v === undefined || !Number.isFinite(v)) return undefined;
+      return index!.valueUnit === 'millis' ? v : v * 1000;
+    } catch (err) {
+      if (err instanceof OpenCloudError && err.status === 404) return undefined;
+      throw err;
+    }
+  };
+
   log.info(`${resumed ? 'resuming' : 'starting'} sync run #${run.id} (config ${hash}) at up to ${limiter.rate} req/min`);
 
   const targets = config.game.datastores.filter((d) => !opts.datastores || opts.datastores.includes(d.name));
@@ -112,8 +129,16 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
         if (index && !opts.full && discoveryOf(ds, config.game) === 'index') {
           const last = await store.lastCompletedFor(ds.name);
           if (last) {
-            c.mode = 'index';
-            c.since = new Date(last.getTime() - index.marginMinutes * 60_000).toISOString();
+            const cutoff = last.getTime() - index.marginMinutes * 60_000;
+            const start = await (indexStart ??= oldestIndexMs());
+            if (start === undefined) {
+              log.warn(`${index.orderedDatastore} has no entries (not written yet?); ${ds.name} falls back to a full listing`);
+            } else if (start > cutoff) {
+              log.info(`${index.orderedDatastore} only reaches back to ${new Date(start).toISOString()}, after the cutoff; ${ds.name} falls back to a full listing`);
+            } else {
+              c.mode = 'index';
+              c.since = new Date(cutoff).toISOString();
+            }
           }
         }
         cursor.datastores[ds.name] = c;

@@ -81,7 +81,7 @@ sync:
 | `concurrency` | `4` | Parallel fetches within a page. |
 | `includeTestPlayers` | `false` | Negative user ids are Studio test players; skipped unless true. |
 | `window` | none | `start`, `end` as `HH:MM`, and `timezone`. Outside the window the sync sleeps. |
-| `index` | none | A game-written OrderedDataStore of last-login times, which makes runs incremental. `orderedDatastore`, `scope` (`global`), `keyTemplate` (`{userId}`), `valueUnit` (`seconds` or `millis`), `marginMinutes` (`120`, how far before the previous run to look). Needs the API scope `universe.ordered-data-store.scope.entry:read`. |
+| `index` | none | A game-written OrderedDataStore of last-login times, which makes runs incremental. `orderedDatastore`, `scope` (`global`), `keyTemplate` (`{userId}`), `valueUnit` (`seconds` or `millis`), `marginMinutes` (`120`, how far before the previous run to look). Needs the API scope `universe.ordered-data-store.scope.entry:read`. Runs list every key until the index's oldest entry is older than that cutoff. |
 
 ## facts.yaml
 
